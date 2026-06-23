@@ -10,7 +10,7 @@ part 'global_feed_event.dart';
 part 'global_feed_state.dart';
 
 class GlobalFeedBloc extends Bloc<GlobalFeedEvent, GlobalFeedState> {
-  late CustomRankingLiveCollection liveCollection;
+  late GlobalFeedLiveCollection liveCollection;
   late GlobalPinnedPostLiveCollection pinnedPostCollection;
   final int pageSize = 20;
 
@@ -25,8 +25,9 @@ class GlobalFeedBloc extends Bloc<GlobalFeedEvent, GlobalFeedState> {
         )) {
     List<StreamSubscription> subscriptions = [];
 
+    // Chronological newsfeed (newest-first) instead of engagement-ranked.
     liveCollection = AmitySocialClient.newFeedRepository()
-        .getCustomRankingGlobalFeed()
+        .getGlobalFeed()
         .getLiveCollection();
 
     pinnedPostCollection =
@@ -145,6 +146,11 @@ class GlobalFeedBloc extends Bloc<GlobalFeedEvent, GlobalFeedState> {
     list = posts
         .where((element) => !pinnedPostIds.contains(element.postId))
         .toList();
+
+    // Newest-first. Server order for getGlobalFeed() is not guaranteed
+    // chronological, so sort explicitly.
+    list.sort((a, b) => (b.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0))
+        .compareTo(a.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0)));
 
     // Local post would be below pinned post
     if (state.localList.isNotEmpty) {
