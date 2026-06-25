@@ -53,9 +53,38 @@ class PostItemBottom extends NewBaseComponent {
               PostReactionButton(post: post, action: action, isReacting: isReacting, showLabel: hideReactionCount, isOptimisticUi: isOptimisticUi,),
               const SizedBox(width: 12),
               getCommentButton(context, hideReactionCount),
+              if ((post.impression ?? 0) > 0) ...[
+                const SizedBox(width: 12),
+                getImpressionsCount(context),
+              ],
             ],
           )
         )
+      ],
+    );
+  }
+
+  Widget getImpressionsCount(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        SvgPicture.asset(
+          'assets/Icons/ic_eye_gray.svg',
+          package: 'amity_uikit_beta_service',
+          width: 20,
+          height: 20,
+        ),
+        const SizedBox(width: 4),
+        Text(
+          (post.impression ?? 0).formattedCompactString(),
+          style: TextStyle(
+            color: theme.baseColorShade2,
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
       ],
     );
   }
