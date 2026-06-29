@@ -1,3 +1,4 @@
+import 'package:amity_uikit_beta_service/amity_uikit.dart';
 import 'package:amity_uikit_beta_service/v4/core/base_component.dart';
 import 'package:amity_uikit_beta_service/v4/core/styles.dart';
 import 'package:amity_uikit_beta_service/v4/social/community/community_creation/community_setup_page.dart';
@@ -102,8 +103,12 @@ class AmityExploreComponent extends NewBaseComponent {
         Text(title, style: AmityTextStyle.titleBold(theme.baseColorShade3)),
         const SizedBox(height: 4),
         Text(caption, style: AmityTextStyle.caption(theme.baseColorShade3)),
-        const SizedBox(height: 26),
-        _buildCreateCommunityButton(context),
+        // Same gate as the social-home header `+` icon — App-Only employees
+        // see the empty Explore state without a Create CTA.
+        if (AmityUIKit.postCreationEnabled) ...[
+          const SizedBox(height: 26),
+          _buildCreateCommunityButton(context),
+        ],
         const SizedBox(height: 40)
     ]);
 

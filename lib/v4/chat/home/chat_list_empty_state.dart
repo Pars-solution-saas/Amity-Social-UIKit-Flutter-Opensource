@@ -1,3 +1,4 @@
+import 'package:amity_uikit_beta_service/amity_uikit.dart';
 import 'package:amity_uikit_beta_service/v4/chat/create/channel_create_conversation_page.dart';
 import 'package:amity_uikit_beta_service/v4/chat/createGroup/ui/amity_select_group_member_page.dart';
 import 'package:amity_uikit_beta_service/v4/core/styles.dart';
@@ -37,8 +38,12 @@ class ChatListEmptyState extends StatelessWidget {
           Text(context.l10n.chat_empty_description,
             style: AmityTextStyle.caption(theme.baseColorShade3),
           ),
-          const SizedBox(height: 16),
-          newChatButton(context)
+          // Same gate as the chat-home header `+` icon — App-Only employees
+          // see the empty state without a creation CTA.
+          if (AmityUIKit.chatCreationEnabled) ...[
+            const SizedBox(height: 16),
+            newChatButton(context),
+          ],
         ],
       ),
     );
