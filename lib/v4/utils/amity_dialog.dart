@@ -100,13 +100,21 @@ class ConfirmationV4Dialog {
   }) async {
     // Check the platform
     if (Platform.isAndroid) {
+      // Resolve the theme from the caller's context (which lives inside the
+      // Amity ConfigProvider scope). Reading ConfigProvider inside the dialog
+      // builder crashes on Android: showDialog defaults to
+      // useRootNavigator: true, so the dialog is built on the host app's root
+      // navigator — outside AmityUIKitProvider/ConfigProvider — which throws a
+      // ProviderNotFoundException and renders a grey error surface that freezes
+      // the screen. (iOS is unaffected because its branch never reads the
+      // provider.)
+      final appTheme = Provider.of<ConfigProvider>(context, listen: false)
+          .getTheme(null, null);
+      final isDarkMode = appTheme.backgroundColor.computeLuminance() < 0.5;
       // Android-specific code
       return showDialog<void>(
         context: context,
         builder: (BuildContext context) {
-          final appTheme = Provider.of<ConfigProvider>(context, listen: false)
-              .getTheme(null, null);
-          final isDarkMode = appTheme.backgroundColor.computeLuminance() < 0.5;
           return Theme(
             data: isDarkMode ? ThemeData.dark() : ThemeData.light(),
             child: AlertDialog(

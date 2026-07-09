@@ -167,7 +167,17 @@ class AmityPostComposerPage extends NewBasePage {
             final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
             final isKeyboardVisible = keyboardHeight > 0;
 
-            return Scaffold(
+            return PopScope(
+              // Route the Android system back button (and predictive-back
+              // gesture) through the same discard flow as the app bar's X
+              // button, so both behave identically instead of the back button
+              // silently dropping the draft.
+              canPop: false,
+              onPopInvokedWithResult: (didPop, result) {
+                if (didPop) return;
+                handleClose(context);
+              },
+              child: Scaffold(
               backgroundColor: theme.backgroundColor,
               appBar: buildAppBar(context),
               body: Stack(
@@ -232,6 +242,7 @@ class AmityPostComposerPage extends NewBasePage {
                   ),
                 ],
               ),
+            ),
             );
           },
         );
@@ -406,7 +417,16 @@ class AmityPostComposerPage extends NewBasePage {
     if (isPosting) {
       return;
     }
-    
+
+    // Nothing typed or attached yet — just close, no discard prompt.
+    final hasUnsavedContent =
+        textController.text.trim().isNotEmpty || selectedFiles.isNotEmpty;
+    if (!hasUnsavedContent) {
+      Navigator.pop(context);
+      onPopRequested?.call(true);
+      return;
+    }
+
     ConfirmationV4Dialog().show(
       context: context,
       title: context.l10n.post_discard,

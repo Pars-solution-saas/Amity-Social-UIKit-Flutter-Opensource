@@ -55,11 +55,19 @@ class AmityDetailedMediaAttachmentComponent extends NewBaseComponent {
     final isVideoPostEnabled = featureConfig.post.video.createEnabled;
     final isImagePostEnabled = featureConfig.post.image.createEnabled;
 
-    return Column(
+    // These ListTiles live inside CustomBottomSheet's decorated Container.
+    // Without a Material ancestor between that DecoratedBox and the ListTiles,
+    // Flutter throws the "ListTile background color or ink splashes may be
+    // invisible" assertion in debug builds — which the community screen's
+    // ErrorWidget.builder catches and surfaces as "Unable to load community".
+    // A transparent Material satisfies the requirement without changing looks.
+    return Material(
+      type: MaterialType.transparency,
+      child: Column(
       children: [
         Column(
           children: [
-            if ((isVideoPostEnabled || isImagePostEnabled)) 
+            if ((isVideoPostEnabled || isImagePostEnabled))
               _buildListTile(
                 assetPath: 'assets/Icons/amity_ic_camera_button.svg',
                 title: context.l10n.general_camera,
@@ -80,6 +88,7 @@ class AmityDetailedMediaAttachmentComponent extends NewBaseComponent {
           ],
         ),
       ],
+      ),
     );
   }
 }

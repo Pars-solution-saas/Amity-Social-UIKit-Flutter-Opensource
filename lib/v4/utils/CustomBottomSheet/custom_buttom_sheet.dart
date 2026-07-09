@@ -3,7 +3,7 @@ import 'package:amity_uikit_beta_service/v4/utils/CustomBottomSheet/bloc/custom_
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class CustomBottomSheet extends StatelessWidget {
+class CustomBottomSheet extends StatefulWidget {
   final AmityThemeColor theme;
   final Widget collapsedContent;
   final Widget expandedContent;
@@ -11,10 +11,7 @@ class CustomBottomSheet extends StatelessWidget {
   final double maxSize;
   final bool isKeyboardVisible;
 
-  final DraggableScrollableController sheetController =
-      DraggableScrollableController();
-
-  CustomBottomSheet({
+  const CustomBottomSheet({
     Key? key,
     required this.theme,
     required this.collapsedContent,
@@ -25,7 +22,31 @@ class CustomBottomSheet extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  State<CustomBottomSheet> createState() => _CustomBottomSheetState();
+}
+
+class _CustomBottomSheetState extends State<CustomBottomSheet> {
+  // Owned by the State so it is created once and disposed — previously a new
+  // controller was allocated (and leaked) on every parent rebuild, which also
+  // detached mid-animation and could freeze the compose screen.
+  final DraggableScrollableController sheetController =
+      DraggableScrollableController();
+
+  @override
+  void dispose() {
+    sheetController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final theme = widget.theme;
+    final collapsedContent = widget.collapsedContent;
+    final expandedContent = widget.expandedContent;
+    final minSize = widget.minSize;
+    final maxSize = widget.maxSize;
+    final isKeyboardVisible = widget.isKeyboardVisible;
+
     final keyboardInset = MediaQuery.of(context).viewInsets.bottom;
 
     return BlocProvider(
@@ -33,7 +54,7 @@ class CustomBottomSheet extends StatelessWidget {
       child: BlocBuilder<CustomBottomSheetBloc, CustomBottomSheetState>(
         builder: (context, state) {
           final triggeredHeight = ((maxSize - minSize) * 0.5) + minSize;
-          
+
           // Determine currentSize based on keyboard and state
           final currentSize = isKeyboardVisible 
               ? minSize 
