@@ -34,27 +34,30 @@ class SingleImagePostViewer extends StatelessWidget {
         ),
         body: Padding(
             padding: const EdgeInsets.only(bottom: 80),
-            child: Center(
-                child: Image.network(
-              imageUrl,
-              fit: BoxFit.fitWidth,
-              loadingBuilder: (context, child, loadingProgress) {
-                if (loadingProgress == null) {
-                  return child;
-                }
-                return Container(
-                  color: theme.baseColorShade4,
-                  height: 500,
-                  width: double.infinity,
-                );
-              },
-              errorBuilder: (context, error, stackTrace) {
-                return Container(
-                  color: theme.baseColorShade4,
-                  height: 500,
-                  width: double.infinity,
-                );
-              },
-            ))));
+            child: InteractiveViewer(
+                minScale: 1,
+                maxScale: 4,
+                child: Center(
+                    child: Image.network(
+                  imageUrl,
+                  fit: BoxFit.fitWidth,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) {
+                      return child;
+                    }
+                    return Container(
+                      color: theme.baseColorShade4,
+                      height: 500,
+                      width: double.infinity,
+                    );
+                  },
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      color: theme.baseColorShade4,
+                      height: 500,
+                      width: double.infinity,
+                    );
+                  },
+                )))));
   }
 }

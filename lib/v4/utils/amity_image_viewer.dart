@@ -32,6 +32,13 @@ class _AmityImageViewerState extends State<AmityImageViewer> {
   late Function()? _onDelete;
   late Function()? _onSave;
 
+  // Pinch / double-tap zoom. While zoomed, swipe-down-to-dismiss is turned
+  // off so panning the image doesn't accidentally close the viewer.
+  final TransformationController _transformationController =
+      TransformationController();
+  final double _maxScale = 4.0;
+  final ValueNotifier<bool> _isZoomed = ValueNotifier(false);
+
   @override
   void initState() {
     super.initState();
@@ -39,6 +46,32 @@ class _AmityImageViewerState extends State<AmityImageViewer> {
     _showSaveButton = widget.showSaveButton;
     _onDelete = widget.onDelete ?? () {};
     _onSave = widget.onSave ?? () {};
+    _transformationController.addListener(() {
+      _isZoomed.value =
+          _transformationController.value.getMaxScaleOnAxis() > 1.0;
+    });
+  }
+
+  @override
+  void dispose() {
+    _transformationController.dispose();
+    _isZoomed.dispose();
+    super.dispose();
+  }
+
+  void _handleDoubleTapDown(TapDownDetails details) {
+    if (_transformationController.value.getMaxScaleOnAxis() > 1.0) {
+      // Already zoomed in — reset to fit.
+      _transformationController.value = Matrix4.identity();
+    } else {
+      final position = details.localPosition;
+      _transformationController.value = Matrix4.identity()
+        ..translate(
+          -position.dx * (_maxScale - 1),
+          -position.dy * (_maxScale - 1),
+        )
+        ..scale(_maxScale);
+    }
   }
 
   @override
@@ -46,95 +79,106 @@ class _AmityImageViewerState extends State<AmityImageViewer> {
     return SafeArea(
       child: Scaffold(
         backgroundColor: Colors.black,
-        body: Dismissible(
-          key: const Key('dismissible'),
-          direction: DismissDirection.down,
-          onDismissed: (_) => Navigator.of(context).pop(),
-          child: Stack(
-            children: [
-              Column(
-                children: [
-                  Expanded(
-                    child: Image.network(
-                      widget.imageUrl,
-                      errorBuilder: (context, error, stackTrace) {
-                        context.read<AmityToastBloc>().add(AmityToastShort(
-                          message: context.l10n.image_load_error,
-                          icon: AmityToastIcon.warning,
-                          bottomPadding: AmityChatPage.toastBottomPadding
-                        ));
-                        return Image.asset(
-                          'assets/Icons/amity_ic_image_error.png',
-                          package: 'amity_uikit_beta_service',
-                          fit: BoxFit.contain,
-                        );
-                      },
-                    ),
-                  ),
-                  Align(
-                    alignment: Alignment.bottomCenter,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          if (_showDeleteButton) ...[
-                            GestureDetector(
-                              onTap: () {
-                                if (_onDelete != null) _onDelete!();
-                              },
-                              child: Container(
-                                child: SvgPicture.asset(
-                                  'assets/Icons/amity_ic_deleted_message.svg',
-                                  package: 'amity_uikit_beta_service',
-                                  width: 28,
-                                  height: 24,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ] else ...[
-                            const SizedBox(
-                              width: 28,
-                              height: 24,
-                            ),
-                          ],
-                          if (_showSaveButton)
-                            GestureDetector(
-                              onTap: () {
-                                if (_onSave != null) _onSave!();
-                              },
-                              child: Container(
-                                child: SvgPicture.asset(
-                                  'assets/Icons/amity_ic_save_image_white.svg',
-                                  package: 'amity_uikit_beta_service',
-                                  width: 28,
-                                  height: 24,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                        ],
+        body: ValueListenableBuilder<bool>(
+          valueListenable: _isZoomed,
+          builder: (context, zoomed, _) => Dismissible(
+            key: const Key('dismissible'),
+            direction: zoomed ? DismissDirection.none : DismissDirection.down,
+            onDismissed: (_) => Navigator.of(context).pop(),
+            child: Stack(
+              children: [
+                Column(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onDoubleTapDown: _handleDoubleTapDown,
+                        child: InteractiveViewer(
+                          transformationController: _transformationController,
+                          minScale: 1,
+                          maxScale: _maxScale,
+                          child: Image.network(
+                            widget.imageUrl,
+                            errorBuilder: (context, error, stackTrace) {
+                              context.read<AmityToastBloc>().add(
+                                    AmityToastShort(
+                                      message: context.l10n.image_load_error,
+                                      icon: AmityToastIcon.warning,
+                                      bottomPadding:
+                                          AmityChatPage.toastBottomPadding,
+                                    ),
+                                  );
+                              return Image.asset(
+                                'assets/Icons/amity_ic_image_error.png',
+                                package: 'amity_uikit_beta_service',
+                                fit: BoxFit.contain,
+                              );
+                            },
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-              Container(
-                alignment: Alignment.topLeft,
-                padding: const EdgeInsets.only(left: 16),
-                child: IconButton(
-                  icon: SvgPicture.asset(
-                    'assets/Icons/amity_ic_close_viewer.svg',
-                    package: 'amity_uikit_beta_service',
-                    width: 32,
-                    height: 32,
-                  ),
-                  color: Colors.white,
-                  onPressed: () => Navigator.of(context).pop(),
+                    Align(
+                      alignment: Alignment.bottomCenter,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            if (_showDeleteButton) ...[
+                              GestureDetector(
+                                onTap: () {
+                                  if (_onDelete != null) _onDelete!();
+                                },
+                                child: Container(
+                                  child: SvgPicture.asset(
+                                    'assets/Icons/amity_ic_deleted_message.svg',
+                                    package: 'amity_uikit_beta_service',
+                                    width: 28,
+                                    height: 24,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ] else ...[
+                              const SizedBox(width: 28, height: 24),
+                            ],
+                            if (_showSaveButton)
+                              GestureDetector(
+                                onTap: () {
+                                  if (_onSave != null) _onSave!();
+                                },
+                                child: Container(
+                                  child: SvgPicture.asset(
+                                    'assets/Icons/amity_ic_save_image_white.svg',
+                                    package: 'amity_uikit_beta_service',
+                                    width: 28,
+                                    height: 24,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
+                Container(
+                  alignment: Alignment.topLeft,
+                  padding: const EdgeInsets.only(left: 16),
+                  child: IconButton(
+                    icon: SvgPicture.asset(
+                      'assets/Icons/amity_ic_close_viewer.svg',
+                      package: 'amity_uikit_beta_service',
+                      width: 32,
+                      height: 32,
+                    ),
+                    color: Colors.white,
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
