@@ -229,7 +229,7 @@ class AmityCommunityAddMemberPage extends NewBasePage {
             child: Container(
                 decoration: BoxDecoration(
                   color: state.selectedUsers.isEmpty
-                      ? theme.baseColorShade3 // Disabled: grey, still visible
+                      ? theme.primaryColor.blend(ColorBlendingOption.shade2)
                       : theme.primaryColor, // Rectangle background color
                   borderRadius: BorderRadius.circular(8.0), // Rounded corners
                 ),
