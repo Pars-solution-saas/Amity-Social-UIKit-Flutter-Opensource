@@ -346,7 +346,7 @@ class AmityCommunitySetupPage extends NewBasePage {
             child: Container(
                 decoration: BoxDecoration(
                   color: state.communityName.isEmpty
-                      ? theme.primaryColor.blend(ColorBlendingOption.shade2)
+                      ? theme.baseColorShade3 // Disabled: grey, still visible
                       : theme.primaryColor, // Rectangle background color
                   borderRadius: BorderRadius.circular(8.0), // Rounded corners
                 ),
@@ -402,7 +402,7 @@ class AmityCommunitySetupPage extends NewBasePage {
                 decoration: BoxDecoration(
                   color: state.communityName.isEmpty ||
                           !state.hasExistingDataChanged
-                      ? theme.primaryColor.blend(ColorBlendingOption.shade2)
+                      ? theme.baseColorShade3 // Disabled: grey, still visible
                       : theme.primaryColor, // Rectangle background color
                   borderRadius: BorderRadius.circular(8.0), // Rounded corners
                 ),
