@@ -25,7 +25,10 @@ Widget communityList(
     decoration: BoxDecoration(color: theme.backgroundColor),
     child: IntrinsicHeight(
       child: ListView.separated(
-        padding: const EdgeInsets.symmetric(vertical: 16),
+        padding: EdgeInsets.only(
+          top: 16,
+          bottom: 16 + MediaQuery.paddingOf(context).bottom,
+        ),
         controller: scrollController,
         itemCount: communities.length,
         separatorBuilder: (context, index) {
