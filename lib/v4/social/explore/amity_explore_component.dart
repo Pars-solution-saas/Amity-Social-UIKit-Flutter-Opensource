@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import 'package:amity_uikit_beta_service/amity_uikit.dart';
 import 'package:amity_uikit_beta_service/v4/core/base_component.dart';
 import 'package:amity_uikit_beta_service/v4/core/styles.dart';
@@ -78,8 +76,7 @@ class AmityExploreComponent extends NewBaseComponent {
               context.read<ExploreComponentCubit>().setTrendingState(state);
             },
           ),
-          // Clears any bar the host app floats over us.
-          SizedBox(height: math.max(35, MediaQuery.paddingOf(context).bottom + 16)),
+          const SizedBox(height: 35),
         ],
       ),
     );

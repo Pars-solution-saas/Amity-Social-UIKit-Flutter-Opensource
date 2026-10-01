@@ -144,10 +144,6 @@ class AmityGlobalFeedComponent extends NewBaseComponent {
                         child: const CircularProgressIndicator(),
                       ),
                     ),
-                  // Clears any bar the host app floats over us.
-                  SliverToBoxAdapter(
-                    child: SizedBox(height: MediaQuery.paddingOf(context).bottom),
-                  ),
                 ],
               ),
             ),
