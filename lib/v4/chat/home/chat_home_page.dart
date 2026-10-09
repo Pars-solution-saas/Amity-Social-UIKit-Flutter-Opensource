@@ -22,7 +22,12 @@ import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 
 class AmityChatHomePage extends NewBasePage {
-  AmityChatHomePage({super.key}) : super(pageId: 'chat_home_page');
+  AmityChatHomePage({super.key, this.onBackTap})
+      : super(pageId: 'chat_home_page');
+
+  /// Shows a back button before the title when set, for hosts that open
+  /// Chat as a sub-page.
+  final VoidCallback? onBackTap;
 
   @override
   Widget buildPage(BuildContext context) {
@@ -52,7 +57,9 @@ class AmityChatHomePage extends NewBasePage {
                       Scaffold(
                         appBar: PreferredSize(
                           preferredSize: const Size.fromHeight(kToolbarHeight),
-                          child: ChatHomePageNavigationBar(),
+                          child: ChatHomePageNavigationBar(
+                            onBackTap: onBackTap,
+                          ),
                         ),
                         backgroundColor: theme.backgroundColor,
                         body: Column(
@@ -176,8 +183,11 @@ class _ChatTabs extends NewBaseComponent {
 }
 
 class ChatHomePageNavigationBar extends NewBaseComponent {
-  ChatHomePageNavigationBar({Key? key, String? pageId})
+  ChatHomePageNavigationBar({Key? key, String? pageId, this.onBackTap})
       : super(key: key, pageId: pageId, componentId: 'chat_top_navigation');
+
+  /// Shows a back button before the title when set.
+  final VoidCallback? onBackTap;
 
   @override
   Widget buildComponent(BuildContext context) {
@@ -204,13 +214,22 @@ class ChatHomePageNavigationBar extends NewBaseComponent {
               ),
             ),
             centerTitle: true,
-            leadingWidth: 65,
+            leadingWidth: onBackTap == null ? 65 : 120,
             leading: Padding(
-              padding: const EdgeInsets.only(left: 16.0),
+              padding: EdgeInsets.only(left: onBackTap == null ? 16.0 : 4.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
+                  if (onBackTap != null)
+                    IconButton(
+                      icon: Icon(
+                        Icons.arrow_back_ios_new,
+                        size: 20,
+                        color: theme.baseColor,
+                      ),
+                      onPressed: onBackTap,
+                    ),
                   Text(context.l10n.chat_title,
                       style: AmityTextStyle.headline(theme.baseColor)),
                 ],
