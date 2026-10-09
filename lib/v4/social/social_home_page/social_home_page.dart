@@ -11,7 +11,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AmitySocialHomePage extends NewBasePage {
-  AmitySocialHomePage({super.key}) : super(pageId: 'social_home_page');
+  AmitySocialHomePage({
+    super.key,
+    this.onBackTap,
+    this.onChatTap,
+    this.chatUnreadCount = 0,
+  }) : super(pageId: 'social_home_page');
+
+  /// Shows a back button in the header when set, for hosts that open
+  /// Community as a sub-page.
+  final VoidCallback? onBackTap;
+
+  /// Shows a chat button in the header when set.
+  final VoidCallback? onChatTap;
+
+  /// Unread count shown on the chat button. Zero shows nothing.
+  final int chatUnreadCount;
 
   @override
   Widget buildPage(BuildContext context) {
@@ -37,6 +52,9 @@ class AmitySocialHomePage extends NewBasePage {
                 child: AmitySocialHomeTopNavigationComponent(
                   pageId: pageId,
                   selectedTab: currentTab,
+                  onBackTap: onBackTap,
+                  onChatTap: onChatTap,
+                  chatUnreadCount: chatUnreadCount,
                   searchButtonAction: () {
                     if (currentTab == AmitySocialHomePageTab.newsFeed || currentTab == AmitySocialHomePageTab.explore) {
                       Navigator.of(context).push(

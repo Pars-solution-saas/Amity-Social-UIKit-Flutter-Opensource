@@ -10,17 +10,40 @@ class AmitySocialHomeTopNavigationComponent extends NewBaseComponent {
   final AmitySocialHomePageTab selectedTab;
   final void Function()? searchButtonAction;
 
+  /// Shows a back button before the title when set.
+  final VoidCallback? onBackTap;
+
+  /// Shows a chat button after search when set.
+  final VoidCallback? onChatTap;
+
+  /// Unread count shown on the chat button. Zero shows nothing.
+  final int chatUnreadCount;
+
   AmitySocialHomeTopNavigationComponent({
     Key? key,
     String? pageId,
     required this.selectedTab,
     this.searchButtonAction,
+    this.onBackTap,
+    this.onChatTap,
+    this.chatUnreadCount = 0,
   }) : super(key: key, pageId: pageId, componentId: 'top_navigation');
 
   @override
   Widget buildComponent(BuildContext context) {
     return AppBar(
       automaticallyImplyLeading: false,
+      leading: onBackTap == null
+          ? null
+          : IconButton(
+              icon: Icon(
+                Icons.arrow_back_ios_new,
+                size: 20,
+                color: theme.baseColor,
+              ),
+              onPressed: onBackTap,
+            ),
+      titleSpacing: onBackTap == null ? null : 0,
       title: Text(
         context.l10n.community_title,
         style: TextStyle(
@@ -60,6 +83,55 @@ class AmitySocialHomeTopNavigationComponent extends NewBaseComponent {
             }
           },
         ),
+        if (onChatTap != null)
+          IconButton(
+            icon: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color:
+                        theme.secondaryColor.blend(ColorBlendingOption.shade4),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.chat_bubble_outline,
+                    size: 18,
+                    color: theme.secondaryColor,
+                  ),
+                ),
+                if (chatUnreadCount > 0)
+                  Positioned(
+                    right: -6,
+                    top: -6,
+                    // Height equals minWidth: a circle for one digit.
+                    child: Container(
+                      height: 18,
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      alignment: Alignment.center,
+                      constraints: const BoxConstraints(minWidth: 18),
+                      decoration: BoxDecoration(
+                        color: theme.alertColor,
+                        borderRadius: BorderRadius.circular(9),
+                      ),
+                      child: Text(
+                        chatUnreadCount > 99 ? '99+' : '$chatUnreadCount',
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          height: 1,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            onPressed: onChatTap,
+          ),
         if (selectedTab == AmitySocialHomePageTab.newsFeed)
           AmityCreatePostMenuComponent(),
         if (selectedTab == AmitySocialHomePageTab.myCommunities)
