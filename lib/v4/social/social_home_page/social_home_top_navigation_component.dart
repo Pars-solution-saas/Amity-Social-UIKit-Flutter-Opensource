@@ -96,10 +96,15 @@ class AmitySocialHomeTopNavigationComponent extends NewBaseComponent {
                         theme.secondaryColor.blend(ColorBlendingOption.shade4),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(
-                    Icons.chat_bubble_outline,
-                    size: 18,
-                    color: theme.secondaryColor,
+                  padding: const EdgeInsets.all(7),
+                  // Amity's solid bubble, tinted like the search icon.
+                  child: SvgPicture.asset(
+                    'assets/Icons/ic_message_bubble_gray.svg',
+                    package: 'amity_uikit_beta_service',
+                    colorFilter: ColorFilter.mode(
+                      theme.secondaryColor,
+                      BlendMode.srcIn,
+                    ),
                   ),
                 ),
                 if (chatUnreadCount > 0)
