@@ -102,6 +102,15 @@ class AmityChatPage extends NewBasePage {
                       .add(AmityToastDismissIfLoading());
                   _handleToastDismissal(context, state);
                 }
+                // Dismiss loading toast for empty chats that finished loading
+                // but state is still Initial (race between message stream and loading state)
+                if (!state.isFetching &&
+                    state is ChatPageStateInitial &&
+                    !isJustCreated) {
+                  context
+                      .read<AmityToastBloc>()
+                      .add(AmityToastDismissIfLoading());
+                }
 
                 final isLoadingUserAvatar =
                     state.avatarUrl == null && state.userDisplayName == null;
@@ -237,6 +246,24 @@ class AmityChatPage extends NewBasePage {
                                       ChatPageEventMarkReadMessage(
                                           message: firstItem));
                                 }
+
+                                if (!state.isFetching &&
+                                    state.messages.isEmpty &&
+                                    state is! ChatPageStateInitial) {
+                                  return Center(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(24.0),
+                                      child: Text(
+                                        context.l10n.chat_no_message_yet,
+                                        style: TextStyle(
+                                          fontSize: 15,
+                                          color: theme.baseColorShade1,
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                }
+
                                 // After layout, detect first overflow and update stable state
                                 WidgetsBinding.instance.addPostFrameCallback((_) {
                                   if (!state.contentOverflowsScreen &&
